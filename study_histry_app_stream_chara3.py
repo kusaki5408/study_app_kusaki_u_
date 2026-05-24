@@ -10,7 +10,7 @@ load_dotenv()
 
 # --- ⚙️ 画面の設定（Config） ---
 st.set_page_config(
-    page_title="語呂合わせ歴史暗記クイズ",
+    page_title="レキーシ先生の歴史クイズ",
     page_icon="🌸",
     layout="centered"
 )
