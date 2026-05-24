@@ -15,8 +15,8 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🌸 語呂合わせ歴史暗記クイズ！")
-st.caption("レキーシ先生と一緒に、楽しく歴史の重要項目を暗記しよう！")
+st.title("🌸 レキーシ先生の歴史クイズ")
+st.caption("レキーシ先生と一緒に、楽しく歴史の重要項目を勉強しよう！")
 st.write("---")
 
 # 🔑 Geminiクライアントの準備
