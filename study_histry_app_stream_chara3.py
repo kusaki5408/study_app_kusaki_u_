@@ -42,13 +42,14 @@ history_config = types.GenerateContentConfig(
     【ルール】
     1. 一番最初に歴史の面白い話をひとつ入れてください。1回のお返事につき、必ず「1問だけ」出題してください。
      問題は、最初の面白い話に関わるものにしてください。
-    　
+     
     2. お返事の最後には、必ず以下の形式でプレイヤーが選ぶ4つの選択肢を書いてください。
        [A: 選択肢1] [B: 選択肢2] [C: 選択肢3] [D: 選択肢4]
        選択肢4は、面白いけど間違った選択肢にしてください。
     3. プレイヤーが「A」「B」「C」「D」のいずれかのボタンで回答してきたら、まずはそれが「正解」か「不正解」かをハッキリ伝えてください。
     4. 【超重要】解説をしたあとに、その年号や項目に関係する面白い話をさらに付け加えてください。
     5. 解説が終わったら、「それでは次の問題ですよ！」と言って、歴史の面白い話、それに関わる新しい4択クイズ（次の問題と4つの選択肢）をセットで出題してください。
+    6. 【厳守】正解や解説の単語を、セキュリティフィルターなどの誤作動で「****」のように伏せ字にしたり、隠したりすることは絶対にしないでください。歴史の用語（例：「勘合」など）はすべてそのまま文字で出力してください。
     """
 )
 
@@ -73,7 +74,7 @@ def get_gemini_response(user_input_now=None):
         )
         
     if not formatted_contents:
-        formatted_contents = ["「歴史クイズ　スタートだよ！」と言って、第1問を出題してください。"]
+        formatted_contents = ["「歴史クイズ スタートだよ！」と言って、第1問を出題してください。"]
 
     for model_name in models_to_try:
         try:
@@ -126,7 +127,7 @@ if st.session_state.history_messages:
             new_opts[role] = text
         st.session_state.current_options = new_opts
 
-# 📥 【ここが大改造！】4択専用のボタンを横並び（または2x2）で配置するまよ！
+# 📥 4択専用のボタンを横並び（または2x2）で配置するまよ！
 st.write("**👇 下のボタンから正解だと思うものを選んで押してね！**")
 
 # 横に4つの列（スペース）を作る
@@ -159,10 +160,15 @@ if user_choice:
     # 先生からの解説＆次のクイズを取得
     with st.spinner("レキーシ先生が採点中です……"):
         res_text = get_gemini_response(user_message)
-        if res_text:
+        
+        # 💡【バグ対策！】もし先生の返事がちゃんと返ってきたら進む
+        if res_text and len(res_text) > 10:  # あまりに短い無言メッセージ弾き
             st.session_state.history_messages.append({"role": "assistant", "content": res_text})
+            st.rerun()
         else:
-            st.error("通信エラーです。もう一度ボタンを押してみてね。")
-            
-    # 画面をリフレッシュして最新のクイズへ進める
-    st.rerun()
+            # 🚨 先生がフリーズしちゃった場合の安全装置まよ！
+            st.warning("レキーシ先生がちょっと疲れちゃったみたいまよ。新しいクイズを始めるまよ！")
+            if st.button("最初からやり直す 🔄", use_container_width=True):
+                st.session_state.history_messages = []
+                st.session_state.current_options = {"A": "A", "B": "B", "C": "C", "D": "D"}
+                st.rerun()
